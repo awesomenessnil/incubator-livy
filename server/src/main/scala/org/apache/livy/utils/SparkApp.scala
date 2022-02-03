@@ -18,8 +18,7 @@
 package org.apache.livy.utils
 
 import scala.collection.JavaConverters._
-
-import org.apache.livy.LivyConf
+import org.apache.livy.{LivyConf, Logging}
 
 object AppInfo {
   val DRIVER_LOG_URL_NAME = "driverLogUrl"
@@ -54,7 +53,7 @@ trait SparkAppListener {
 /**
  * Provide factory methods for SparkApp.
  */
-object SparkApp {
+object SparkApp extends Logging {
   private val SPARK_YARN_TAG_KEY = "spark.yarn.tags"
 
   object State extends Enumeration {
@@ -73,6 +72,7 @@ object SparkApp {
       uniqueAppTag: String,
       livyConf: LivyConf,
       sparkConf: Map[String, String]): Map[String, String] = {
+    sparkConf foreach {case (key, value) => info("SparkConf: " + key + " -> " + value)}
     if (livyConf.isRunningOnYarn()) {
       val userYarnTags = sparkConf.get(SPARK_YARN_TAG_KEY).map("," + _).getOrElse("")
       val mergedYarnTags = uniqueAppTag + userYarnTags
@@ -118,10 +118,13 @@ object SparkApp {
       livyConf: LivyConf,
       listener: Option[SparkAppListener]): SparkApp = {
     if (livyConf.isRunningOnYarn()) {
+      info(s"Yarn: $uniqueAppTag, $appId, $process, $listener, $livyConf")
       new SparkYarnApp(uniqueAppTag, appId, process, listener, livyConf)
     } else if (livyConf.isRunningOnKubernetes()) {
+      info(s"K8S: $uniqueAppTag, $appId, $process, $listener, $livyConf")
       new SparkKubernetesApp(uniqueAppTag, appId, process, listener, livyConf)
     } else {
+      info(s"spark-submit: ${process.get}, $listener")
       require(process.isDefined, "process must not be None when Livy master is not YARN or " +
         "Kubernetes.")
       new SparkProcApp(process.get, listener)
