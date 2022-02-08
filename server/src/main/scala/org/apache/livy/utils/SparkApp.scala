@@ -121,6 +121,7 @@ object SparkApp extends Logging {
       info(s"Yarn: $uniqueAppTag, $appId, $process, $listener, $livyConf")
       new SparkYarnApp(uniqueAppTag, appId, process, listener, livyConf)
     } else if (livyConf.isRunningOnKubernetes()) {
+      livyConf.debugVars(info)
       info(s"K8S: $uniqueAppTag, $appId, $process, $listener, $livyConf")
       new SparkKubernetesApp(uniqueAppTag, appId, process, listener, livyConf)
     } else {

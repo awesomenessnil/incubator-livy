@@ -381,7 +381,7 @@ object LivyConf {
  *
  * @param loadDefaults whether to also load values from the Java system properties
  */
-class LivyConf(loadDefaults: Boolean) extends ClientConf[LivyConf](null) {
+class LivyConf(loadDefaults: Boolean) extends ClientConf[LivyConf](null) with Debug  {
 
   import LivyConf._
 
@@ -467,4 +467,14 @@ class LivyConf(loadDefaults: Boolean) extends ClientConf[LivyConf](null) {
     deprecatedConfigs.asJava
   }
 
+}
+
+trait Debug {
+  def debugVars(callback: (=> Any) => Unit):Any = {
+    val vars = this.getClass.getDeclaredFields
+    for(v <- vars){
+      v.setAccessible(true)
+      callback("Field: " + v.getName() + " => " + v.get(this))
+    }
+  }
 }
