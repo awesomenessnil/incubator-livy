@@ -342,9 +342,9 @@ object InteractiveSession extends Logging {
     val confVal = if (enableHiveContext) "hive" else "in-memory"
     builderProperties.put("spark.sql.catalogImplementation", confVal)
 
-    if (enableHiveContext) {
-      mergeHiveSiteAndHiveDeps(sparkMajorVersion)
-    }
+//    if (enableHiveContext) {
+//      mergeHiveSiteAndHiveDeps(sparkMajorVersion)
+//    }
 
     // Pick all the RSC-specific configs that have not been explicitly set otherwise, and
     // put them in the resulting properties, so that the remote driver can use them.
@@ -354,8 +354,6 @@ object InteractiveSession extends Logging {
         builderProperties(key) = value
       }
     }
-
-    builderProperties.put("spark.kubernetes.file.upload.path", "s3a://zoobrain-test/zoopyter/")
 
     builderProperties
   }
