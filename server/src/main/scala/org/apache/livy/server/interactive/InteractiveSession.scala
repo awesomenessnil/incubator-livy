@@ -336,15 +336,16 @@ object InteractiveSession extends Logging {
 
     mergeConfList(livyJars(livyConf, scalaVersion), LivyConf.SPARK_JARS)
     val enableHiveContext = livyConf.getBoolean(LivyConf.ENABLE_HIVE_CONTEXT)
+    val disableHiveXMLUpload = livyConf.getBoolean(LivyConf.DISABLE_HIVE_XML_UPLOAD)
     // pass spark.livy.spark_major_version to driver
     builderProperties.put("spark.livy.spark_major_version", sparkMajorVersion.toString)
 
     val confVal = if (enableHiveContext) "hive" else "in-memory"
     builderProperties.put("spark.sql.catalogImplementation", confVal)
 
-//    if (enableHiveContext) {
-//      mergeHiveSiteAndHiveDeps(sparkMajorVersion)
-//    }
+    if (enableHiveContext && !disableHiveXMLUpload) {
+      mergeHiveSiteAndHiveDeps(sparkMajorVersion)
+    }
 
     // Pick all the RSC-specific configs that have not been explicitly set otherwise, and
     // put them in the resulting properties, so that the remote driver can use them.
